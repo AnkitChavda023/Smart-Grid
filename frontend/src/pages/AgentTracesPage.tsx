@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ReactNode, SVGProps } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import * as agentsApi from '../api/agents'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
@@ -330,12 +330,44 @@ function LookupField({
   )
 }
 
+function SimulateButton({
+  onClick,
+  pending,
+  disabled,
+  error,
+}: {
+  onClick: () => void
+  pending: boolean
+  disabled: boolean
+  error: boolean
+}) {
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-2">
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled || pending}
+        className="shrink-0 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 text-sm font-medium text-accent transition-all hover:bg-accent/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {pending ? 'Simulating…' : 'Simulate now'}
+      </button>
+      <span className="text-xs text-text-muted">
+        {error ? 'Simulation failed - try again.' : 'No live event yet for this ID? Trigger one manually.'}
+      </span>
+    </div>
+  )
+}
+
 function VendorEvaluatorPanel() {
   const [vendorId, setVendorId] = useState('')
   const query = useQuery({
     queryKey: ['vendor-evaluations', vendorId],
     queryFn: () => agentsApi.vendorEvaluations(vendorId),
     enabled: !!vendorId,
+  })
+  const simulate = useMutation({
+    mutationFn: () => agentsApi.simulateVendorEvaluation(vendorId),
+    onSuccess: () => query.refetch(),
   })
   const latest = query.data?.[0]
 
@@ -349,11 +381,19 @@ function VendorEvaluatorPanel() {
       />
       <div className="mt-4">
         <LookupField label="Vendor ID" placeholder="vendor UUID" value={vendorId} onSubmit={setVendorId} />
+        {vendorId && (
+          <SimulateButton
+            onClick={() => simulate.mutate()}
+            pending={simulate.isPending}
+            disabled={false}
+            error={simulate.isError}
+          />
+        )}
       </div>
       {query.isLoading && <div className="mt-3"><LoadingState label="Loading…" /></div>}
       {query.isError && <div className="mt-3"><ErrorState message="Lookup failed." onRetry={() => query.refetch()} /></div>}
       {vendorId && !query.isLoading && !query.isError && !latest && (
-        <div className="mt-3"><EmptyState title="No evaluations yet" /></div>
+        <div className="mt-3"><EmptyState title="No evaluations yet" description="Use Simulate above to generate one." /></div>
       )}
       {latest && (
         <div className="mt-4 animate-[fadeIn_150ms_ease-out] flex flex-col gap-2 rounded-lg border border-border bg-bg/40 p-3 text-sm text-text">
@@ -377,6 +417,10 @@ function BreachAnalystPanel() {
     queryFn: () => agentsApi.breachAssessments(vendorId),
     enabled: !!vendorId,
   })
+  const simulate = useMutation({
+    mutationFn: () => agentsApi.simulateBreachAssessment(vendorId),
+    onSuccess: () => query.refetch(),
+  })
   const latest = query.data?.[0]
 
   return (
@@ -393,11 +437,19 @@ function BreachAnalystPanel() {
       />
       <div className="mt-4">
         <LookupField label="Vendor ID" placeholder="vendor UUID" value={vendorId} onSubmit={setVendorId} />
+        {vendorId && (
+          <SimulateButton
+            onClick={() => simulate.mutate()}
+            pending={simulate.isPending}
+            disabled={false}
+            error={simulate.isError}
+          />
+        )}
       </div>
       {query.isLoading && <div className="mt-3"><LoadingState label="Loading…" /></div>}
       {query.isError && <div className="mt-3"><ErrorState message="Lookup failed." onRetry={() => query.refetch()} /></div>}
       {vendorId && !query.isLoading && !query.isError && !latest && (
-        <div className="mt-3"><EmptyState title="No assessments yet" /></div>
+        <div className="mt-3"><EmptyState title="No assessments yet" description="Use Simulate above to generate one." /></div>
       )}
       {latest && (
         <div className="mt-4 animate-[fadeIn_150ms_ease-out] flex flex-col gap-2 rounded-lg border border-border bg-bg/40 p-3 text-sm text-text">
@@ -422,6 +474,10 @@ function DemandForecasterPanel() {
     queryFn: () => agentsApi.demandForecasts(skuId),
     enabled: !!skuId,
   })
+  const simulate = useMutation({
+    mutationFn: () => agentsApi.simulateDemandForecast(skuId),
+    onSuccess: () => query.refetch(),
+  })
   const latest = query.data?.[0]
 
   return (
@@ -436,11 +492,19 @@ function DemandForecasterPanel() {
       />
       <div className="mt-4">
         <LookupField label="SKU ID" placeholder="sku id" value={skuId} onSubmit={setSkuId} />
+        {skuId && (
+          <SimulateButton
+            onClick={() => simulate.mutate()}
+            pending={simulate.isPending}
+            disabled={false}
+            error={simulate.isError}
+          />
+        )}
       </div>
       {query.isLoading && <div className="mt-3"><LoadingState label="Loading…" /></div>}
       {query.isError && <div className="mt-3"><ErrorState message="Lookup failed." onRetry={() => query.refetch()} /></div>}
       {skuId && !query.isLoading && !query.isError && !latest && (
-        <div className="mt-3"><EmptyState title="No forecasts yet" /></div>
+        <div className="mt-3"><EmptyState title="No forecasts yet" description="Use Simulate above to generate one." /></div>
       )}
       {latest && (
         <div className="mt-4 animate-[fadeIn_150ms_ease-out] flex flex-col gap-2 rounded-lg border border-border bg-bg/40 p-3 text-sm text-text">
@@ -468,6 +532,10 @@ function ContractNegotiationPanel() {
     queryFn: () => agentsApi.negotiationRuns(vendorId),
     enabled: !!vendorId,
   })
+  const simulate = useMutation({
+    mutationFn: () => agentsApi.simulateNegotiation(vendorId),
+    onSuccess: () => query.refetch(),
+  })
   const latest = query.data?.[0]
 
   return (
@@ -482,11 +550,19 @@ function ContractNegotiationPanel() {
       />
       <div className="mt-4">
         <LookupField label="Vendor ID" placeholder="vendor UUID" value={vendorId} onSubmit={setVendorId} />
+        {vendorId && (
+          <SimulateButton
+            onClick={() => simulate.mutate()}
+            pending={simulate.isPending}
+            disabled={false}
+            error={simulate.isError}
+          />
+        )}
       </div>
       {query.isLoading && <div className="mt-3"><LoadingState label="Loading…" /></div>}
       {query.isError && <div className="mt-3"><ErrorState message="Lookup failed." onRetry={() => query.refetch()} /></div>}
       {vendorId && !query.isLoading && !query.isError && !latest && (
-        <div className="mt-3"><EmptyState title="No negotiation runs yet" /></div>
+        <div className="mt-3"><EmptyState title="No negotiation runs yet" description="Use Simulate above to generate one." /></div>
       )}
       {latest && (
         <div className="mt-4 animate-[fadeIn_150ms_ease-out] flex flex-col gap-2 rounded-lg border border-border bg-bg/40 p-3 text-sm text-text">

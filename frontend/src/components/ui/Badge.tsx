@@ -13,6 +13,8 @@ const TONE_CLASSES: Record<Tone, string> = {
 const STATUS_TONE: Record<string, Tone> = {
   PENDING: 'warning',
   CONFIRMED: 'success',
+  SHIPPED: 'info',
+  DELIVERED: 'success',
   CANCELLED: 'danger',
   CLOSED: 'default',
 }

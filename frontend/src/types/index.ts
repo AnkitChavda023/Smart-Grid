@@ -11,7 +11,7 @@ export interface OrderItem {
   quantity: number
 }
 
-export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'CLOSED'
+export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'CLOSED'
 
 export interface OrderResponse {
   id: string

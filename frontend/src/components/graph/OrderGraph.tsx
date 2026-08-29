@@ -16,6 +16,8 @@ interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
 const STATUS_COLOR: Record<string, string> = {
   PENDING: '#d97706',
   CONFIRMED: '#16a34a',
+  SHIPPED: '#0891b2',
+  DELIVERED: '#16a34a',
   CANCELLED: '#dc2626',
   CLOSED: '#64748b',
 }
