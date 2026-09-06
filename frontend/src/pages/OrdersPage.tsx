@@ -39,17 +39,16 @@ function useOrderLiveUpdates(orders: OrderResponse[] | undefined, queryKey: read
   useEffect(() => {
     if (!connected || !orders?.length) return
 
-    const unsubscribers = orders
-      .filter((order) => order.status === 'PENDING')
-      .map((order) =>
-        subscribeToOrder(order.id, async () => {
-          const updated = await getOrder(order.id)
-          queryClient.setQueryData<{ content: OrderResponse[] } | undefined>(queryKey, (current) => {
-            if (!current) return current
-            return { ...current, content: current.content.map((o) => (o.id === updated.id ? updated : o)) }
-          })
-        }),
-      )
+    // Subscribe to all displayed orders so state changes reflect in real time without page refresh
+    const unsubscribers = orders.map((order) =>
+      subscribeToOrder(order.id, async () => {
+        const updated = await getOrder(order.id)
+        queryClient.setQueryData<{ content: OrderResponse[]; totalElements: number } | undefined>(queryKey, (current) => {
+          if (!current) return current
+          return { ...current, content: current.content.map((o) => (o.id === updated.id ? updated : o)) }
+        })
+      }),
+    )
 
     return () => unsubscribers.forEach((unsub) => unsub())
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -63,12 +62,14 @@ export function OrdersPage() {
   const [size, setSize] = useState(20)
   const [showCreate, setShowCreate] = useState(false)
   const [cancelTarget, setCancelTarget] = useState<OrderResponse | null>(null)
+  const [transitionError, setTransitionError] = useState<string | null>(null)
 
   const queryKey = ordersQueryKey(statusFilter, page, size)
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey,
     queryFn: () => ordersApi.listOrders(statusFilter === 'ACTIVE' ? undefined : statusFilter, page, size),
     placeholderData: keepPreviousData,
+    refetchInterval: 3000,
   })
 
   useOrderLiveUpdates(data?.content, queryKey)
@@ -99,6 +100,31 @@ export function OrdersPage() {
       setCancelTarget(null)
       queryClient.invalidateQueries({ queryKey: ['orders'] })
     },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || err.message || 'Cancellation rejected'
+      setTransitionError(msg)
+      setTimeout(() => setTransitionError(null), 6000)
+    },
+  })
+
+  const transitionMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) => ordersApi.updateOrderStatus(id, status),
+    onSuccess: (updated) => {
+      setTransitionError(null)
+      queryClient.setQueryData<{ content: OrderResponse[]; totalElements: number } | undefined>(queryKey, (current) => {
+        if (!current) return current
+        return {
+          ...current,
+          content: current.content.map((o) => (o.id === updated.id ? updated : o)),
+        }
+      })
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || err.message || 'State transition rejected'
+      setTransitionError(msg)
+      setTimeout(() => setTransitionError(null), 6000)
+    },
   })
 
   const totalElements = data?.totalElements ?? 0
@@ -108,6 +134,7 @@ export function OrdersPage() {
 
   const { user } = useAuth()
   const canCreate = user?.role === 'PLANNER' || user?.role === 'ADMIN'
+  const canManage = user?.role === 'PLANNER' || user?.role === 'ADMIN'
 
   return (
     <div className="flex flex-col gap-6">
@@ -135,6 +162,12 @@ export function OrdersPage() {
         )}
       </div>
 
+      {transitionError && (
+        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-400">
+          ⚠️ <strong>State Transition Error:</strong> {transitionError}
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-2">
         {STATUS_FILTERS.map((f) => (
           <button
@@ -158,18 +191,16 @@ export function OrdersPage() {
       {!isLoading && !isError && (
         <>
           <Card>
-            <h2 className="mb-3 text-sm font-medium text-text-muted">
-              Order graph <span className="font-normal">(current page)</span>
-            </h2>
+            <h2 className="mb-3 text-sm font-medium text-text-muted">Order graph</h2>
             {data?.content.length ? (
               <OrderGraph orders={data.content} />
             ) : (
-              <EmptyState title="No orders" description="No orders match this filter." />
+              <EmptyState title="No orders yet" description="Create an order to see it appear in the graph." />
             )}
           </Card>
 
           <Card>
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-sm font-medium text-text-muted">Order list</h2>
               <div className="flex items-center gap-3">
                 <label className="flex items-center gap-1.5 text-xs text-text-muted">
@@ -214,6 +245,11 @@ export function OrdersPage() {
                 <OrdersTable
                   orders={data.content}
                   onCancel={(order) => setCancelTarget(order)}
+                  onTransition={(order, nextStatus) =>
+                    transitionMutation.mutate({ id: order.id, status: nextStatus })
+                  }
+                  transitionPending={transitionMutation.isPending}
+                  canManage={canManage}
                 />
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-sm text-text-muted">
                   <span>
@@ -293,12 +329,33 @@ function formatDate(iso: string) {
   }
 }
 
+function getNextAction(status: string) {
+  switch (status) {
+    case 'PENDING':
+      return { nextStatus: 'CONFIRMED', label: 'Confirm' }
+    case 'CONFIRMED':
+      return { nextStatus: 'SHIPPED', label: 'Ship' }
+    case 'SHIPPED':
+      return { nextStatus: 'DELIVERED', label: 'Deliver' }
+    case 'DELIVERED':
+      return { nextStatus: 'CLOSED', label: 'Close' }
+    default:
+      return null
+  }
+}
+
 function OrdersTable({
   orders,
   onCancel,
+  onTransition,
+  transitionPending,
+  canManage,
 }: {
   orders: OrderResponse[]
   onCancel: (order: OrderResponse) => void
+  onTransition: (order: OrderResponse, nextStatus: string) => void
+  transitionPending: boolean
+  canManage: boolean
 }) {
   return (
     <div className="overflow-x-auto">
@@ -311,33 +368,49 @@ function OrdersTable({
             <th className="py-2 pr-4 font-medium">Status</th>
             <th className="py-2 pr-4 font-medium">Vendor</th>
             <th className="py-2 pr-4 font-medium">Items</th>
-            <th className="py-2 pr-4 font-medium" />
+            <th className="py-2 pr-4 font-medium text-right">Lifecycle Actions</th>
           </tr>
         </thead>
         <tbody>
-          {orders.map((order) => (
-            <tr key={order.id} className="border-b border-border/60 last:border-0">
-              <td className="py-2 pr-4 font-mono text-xs text-text-muted">{order.id.slice(0, 8)}</td>
-              <td className="py-2 pr-4 whitespace-nowrap text-text-muted">{formatDate(order.createdAt)}</td>
-              <td className="py-2 pr-4">{order.destinationRegion}</td>
-              <td className="py-2 pr-4">
-                <StatusBadge status={order.status} />
-              </td>
-              <td className="py-2 pr-4 font-mono text-xs text-text-muted">{order.vendorId?.slice(0, 8) ?? '-'}</td>
-              <td className="py-2 pr-4 text-text-muted">{order.items.map((i) => `${i.skuId} ×${i.quantity}`).join(', ')}</td>
-              <td className="py-2 pr-4 text-right">
-                {CANCELLABLE_STATUSES.has(order.status) && (
-                  <button
-                    type="button"
-                    onClick={() => onCancel(order)}
-                    className="rounded-md border border-border px-2.5 py-1 text-xs font-medium text-text-muted transition-colors hover:border-danger/40 hover:bg-danger/10 hover:text-danger"
-                  >
-                    Cancel
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
+          {orders.map((order) => {
+            const action = getNextAction(order.status)
+            return (
+              <tr key={order.id} className="border-b border-border/60 last:border-0 hover:bg-surface/30">
+                <td className="py-2 pr-4 font-mono text-xs text-text-muted">{order.id.slice(0, 8)}</td>
+                <td className="py-2 pr-4 whitespace-nowrap text-text-muted">{formatDate(order.createdAt)}</td>
+                <td className="py-2 pr-4">{order.destinationRegion}</td>
+                <td className="py-2 pr-4">
+                  <StatusBadge status={order.status} />
+                </td>
+                <td className="py-2 pr-4 font-mono text-xs text-text-muted">{order.vendorId?.slice(0, 8) ?? '-'}</td>
+                <td className="py-2 pr-4 text-text-muted">{order.items.map((i) => `${i.skuId} ×${i.quantity}`).join(', ')}</td>
+                <td className="py-2 pr-4 text-right">
+                  <div className="flex items-center justify-end gap-1.5">
+                    {canManage && action && (
+                      <button
+                        type="button"
+                        disabled={transitionPending}
+                        onClick={() => onTransition(order, action.nextStatus)}
+                        className="rounded-md border border-accent/40 bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent transition-colors hover:bg-accent hover:text-accent-fg disabled:opacity-50"
+                        title={`Advance to ${action.nextStatus}`}
+                      >
+                        {action.label} →
+                      </button>
+                    )}
+                    {canManage && CANCELLABLE_STATUSES.has(order.status) && (
+                      <button
+                        type="button"
+                        onClick={() => onCancel(order)}
+                        className="rounded-md border border-border px-2.5 py-1 text-xs font-medium text-text-muted transition-colors hover:border-danger/40 hover:bg-danger/10 hover:text-danger"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>
