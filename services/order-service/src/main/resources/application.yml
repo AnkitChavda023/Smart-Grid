@@ -1,0 +1,22 @@
+server:
+  port: 8181
+
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/order_db
+    username: smartgrid
+    password: smartgrid_dev_pw
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+smartgrid:
+  kafka:
+    bootstrap-servers: localhost:9092
+    schema-registry-url: http://localhost:18081
+    group-id: order-service
+  tracing:
+    service-name: order-service
