@@ -8,9 +8,9 @@ import type { Role } from '../types'
 import type { AxiosError } from 'axios'
 
 const ROLE_OPTIONS: { value: Role; label: string; hint: string }[] = [
-  { value: 'SUPPLIER', label: 'Supplier', hint: 'View everything, place and cancel orders' },
-  { value: 'PLANNER', label: 'Planner', hint: 'Also: submit contract drafts, approve escalated reroutes' },
-  { value: 'ADMIN', label: 'Admin', hint: 'Same access as Planner in this system' },
+  { value: 'ADMIN', label: 'Admin (System Administrator)', hint: 'Full access: manage users, vendors, contracts, view all agent traces' },
+  { value: 'PLANNER', label: 'Planner (Procurement Manager)', hint: 'Create orders, approve reroutes, approve contract drafts, manage vendors' },
+  { value: 'SUPPLIER', label: 'Supplier (Vendor Representative)', hint: 'View assigned orders, update delivery checkpoints, view SLA status' },
 ]
 
 export function RegisterPage() {
