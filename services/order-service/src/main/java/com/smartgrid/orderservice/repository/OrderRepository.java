@@ -17,4 +17,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     List<Order> findDistinctByDestinationRegionAndItems_SkuIdInAndStatusIn(
             String destinationRegion, List<String> skuIds, List<OrderStatus> statuses);
+
+    List<Order> findByStatusAndCreatedAtBefore(OrderStatus status, java.time.Instant createdAt);
+
+    long countByCreatedAtAfter(java.time.Instant createdAt);
 }

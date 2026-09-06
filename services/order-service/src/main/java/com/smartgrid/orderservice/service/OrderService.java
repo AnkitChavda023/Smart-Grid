@@ -78,6 +78,7 @@ public class OrderService {
                 .setReason(reason)
                 .build();
         outboxPublisher.publish(id.toString(), "OrderCancelled", event);
+        notifyOrderStateChange(id.toString(), OrderStatus.CANCELLED);
     }
 
     @Transactional(readOnly = true)
@@ -91,7 +92,7 @@ public class OrderService {
         return orderRepository.findByStatus(OrderStatus.valueOf(statusFilter.toUpperCase()), pageable);
     }
 
-    /** In-flight orders (not yet shipped) for a region carrying any of the given SKUs — used by the Reroute Planner agent (M16) to find what a disruption actually affects. */
+    /** In-flight orders (not yet shipped) for a region carrying any of the given SKUs. */
     @Transactional(readOnly = true)
     public List<Order> findReroutableOrders(String destinationRegion, List<String> skuIds) {
         return orderRepository.findDistinctByDestinationRegionAndItems_SkuIdInAndStatusIn(
@@ -129,7 +130,19 @@ public class OrderService {
         withOrder(orderId, order -> {
             order.setVendorId(vendorId);
             order.setQuoteId(quoteId);
+            orderRepository.save(order);
+            notifyOrderStateChange(order.getId().toString(), order.getStatus());
         });
+    }
+
+    @Transactional
+    public Order transitionOrder(UUID id, OrderStatus targetStatus) {
+        Order order = getOrder(id);
+        OrderStateMachine.assertValidTransition(order.getStatus(), targetStatus);
+        order.setStatus(targetStatus);
+        Order saved = orderRepository.save(order);
+        notifyOrderStateChange(saved.getId().toString(), targetStatus);
+        return saved;
     }
 
     private void withOrder(String orderId, java.util.function.Consumer<Order> action) {
@@ -157,6 +170,31 @@ public class OrderService {
                     .setDestinationRegion(order.getDestinationRegion())
                     .build();
             outboxPublisher.publish(order.getId().toString(), "OrderFulfilled", event);
+            notifyOrderStateChange(order.getId().toString(), OrderStatus.CONFIRMED);
         }
+    }
+
+    private void notifyOrderStateChange(String orderId, OrderStatus status) {
+        try {
+            java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+            String json = String.format("{\"title\":\"Order status updated\",\"body\":\"Order %s is now %s\",\"relatedEntityId\":\"%s\"}",
+                    orderId, status, orderId);
+            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                    .uri(java.net.URI.create("http://localhost:8084/notifications/adhoc"))
+                    .header("Content-Type", "application/json")
+                    .POST(java.net.http.HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+            client.sendAsync(request, java.net.http.HttpResponse.BodyHandlers.discarding());
+        } catch (Exception e) {
+            log.warn("Failed to push real-time notification for order {}: {}", orderId, e.getMessage());
+        }
+    }
+
+    public long countOrdersCreatedAfter(java.time.Instant timestamp) {
+        return orderRepository.countByCreatedAtAfter(timestamp);
+    }
+
+    public long countTotalOrders() {
+        return orderRepository.count();
     }
 }

@@ -1,0 +1,242 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: api-gateway
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8180/.well-known/jwks.json
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "http://localhost:*"
+            allowedMethods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+            allowedHeaders: "*"
+            allowCredentials: true
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 50
+            redis-rate-limiter.burstCapacity: 100
+            redis-rate-limiter.requestedTokens: 1
+            key-resolver: "#{@apiKeyOrIpKeyResolver}"
+      routes:
+        - id: auth-service
+          uri: http://localhost:8180
+          predicates:
+            - Path=/auth/**,/.well-known/jwks.json
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: auth-service
+                fallbackUri: forward:/fallback/auth-service
+            - name: Bulkhead
+              args:
+                name: auth-service
+        - id: order-service
+          uri: http://localhost:8181
+          predicates:
+            - Path=/orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: order-service
+                fallbackUri: forward:/fallback/order-service
+            - name: Bulkhead
+              args:
+                name: order-service
+        - id: vendor-service
+          uri: http://localhost:8182
+          predicates:
+            - Path=/vendors/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: vendor-service
+                fallbackUri: forward:/fallback/vendor-service
+            - name: Bulkhead
+              args:
+                name: vendor-service
+        - id: inventory-service
+          uri: http://localhost:8183
+          predicates:
+            - Path=/inventory/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: inventory-service
+                fallbackUri: forward:/fallback/inventory-service
+            - name: Bulkhead
+              args:
+                name: inventory-service
+        - id: notification-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/notifications/**,/notification-preferences/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: notification-service
+                fallbackUri: forward:/fallback/notification-service
+            - name: Bulkhead
+              args:
+                name: notification-service
+        - id: shipment-service
+          uri: http://localhost:8087
+          predicates:
+            - Path=/shipments/**,/warehouses/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: shipment-service
+                fallbackUri: forward:/fallback/shipment-service
+            - name: Bulkhead
+              args:
+                name: shipment-service
+        - id: contract-service
+          uri: http://localhost:8088
+          predicates:
+            - Path=/contracts/**,/sla-breaches/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: contract-service
+                fallbackUri: forward:/fallback/contract-service
+            - name: Bulkhead
+              args:
+                name: contract-service
+        - id: pricing-service
+          uri: http://localhost:8089
+          predicates:
+            - Path=/quotes/**,/price-rules/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: pricing-service
+                fallbackUri: forward:/fallback/pricing-service
+            - name: Bulkhead
+              args:
+                name: pricing-service
+        - id: analytics-service
+          uri: http://localhost:8090
+          predicates:
+            - Path=/analytics/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: analytics-service
+                fallbackUri: forward:/fallback/analytics-service
+            - name: Bulkhead
+              args:
+                name: analytics-service
+        - id: disruption-detector-agent
+          uri: http://localhost:8085
+          predicates:
+            - Path=/disruptions/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: disruption-detector-agent
+                fallbackUri: forward:/fallback/disruption-detector-agent
+            - name: Bulkhead
+              args:
+                name: disruption-detector-agent
+        - id: reroute-planner-agent
+          uri: http://localhost:8086
+          predicates:
+            - Path=/reroutes/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: reroute-planner-agent
+                fallbackUri: forward:/fallback/reroute-planner-agent
+            - name: Bulkhead
+              args:
+                name: reroute-planner-agent
+        - id: vendor-evaluator-agent
+          uri: http://localhost:8091
+          predicates:
+            - Path=/vendor-evaluations/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: vendor-evaluator-agent
+                fallbackUri: forward:/fallback/vendor-evaluator-agent
+            - name: Bulkhead
+              args:
+                name: vendor-evaluator-agent
+        - id: sla-breach-analyst-agent
+          uri: http://localhost:8092
+          predicates:
+            - Path=/breach-assessments/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: sla-breach-analyst-agent
+                fallbackUri: forward:/fallback/sla-breach-analyst-agent
+            - name: Bulkhead
+              args:
+                name: sla-breach-analyst-agent
+        - id: demand-forecaster-agent
+          uri: http://localhost:8093
+          predicates:
+            - Path=/demand-forecasts/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: demand-forecaster-agent
+                fallbackUri: forward:/fallback/demand-forecaster-agent
+            - name: Bulkhead
+              args:
+                name: demand-forecaster-agent
+        - id: contract-negotiation-agent
+          uri: http://localhost:8094
+          predicates:
+            - Path=/negotiations/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: contract-negotiation-agent
+                fallbackUri: forward:/fallback/contract-negotiation-agent
+            - name: Bulkhead
+              args:
+                name: contract-negotiation-agent
+        - id: diagnostics-unreachable
+          uri: http://localhost:19999
+          predicates:
+            - Path=/diagnostics/unreachable/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: diagnostics-unreachable
+                fallbackUri: forward:/fallback/diagnostics-unreachable
+            - name: Bulkhead
+              args:
+                name: pricing-service
+
+smartgrid:
+  tracing:
+    service-name: api-gateway
+    zipkin-endpoint: http://localhost:9411/api/v2/spans
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,gateway
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
