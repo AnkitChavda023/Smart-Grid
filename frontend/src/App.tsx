@@ -14,6 +14,8 @@ import { DisruptionsPage } from './pages/DisruptionsPage'
 import { ReroutesPage } from './pages/ReroutesPage'
 import { AnalyticsPage } from './pages/AnalyticsPage'
 import { AgentTracesPage } from './pages/AgentTracesPage'
+import { ShipmentsPage } from './pages/ShipmentsPage'
+import { SlaPage } from './pages/SlaPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,17 +36,26 @@ export default function App() {
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+
+                {/* Base protected routes for all authenticated roles */}
                 <Route element={<ProtectedRoute />}>
                   <Route element={<AppShell />}>
                     <Route path="/" element={<OverviewPage />} />
                     <Route path="/orders" element={<OrdersPage />} />
-                    <Route path="/vendors" element={<VendorsPage />} />
-                    <Route path="/disruptions" element={<DisruptionsPage />} />
-                    <Route path="/reroutes" element={<ReroutesPage />} />
-                    <Route path="/analytics" element={<AnalyticsPage />} />
-                    <Route path="/agent-traces" element={<AgentTracesPage />} />
+                    <Route path="/shipments" element={<ShipmentsPage />} />
+                    <Route path="/sla" element={<SlaPage />} />
+
+                    {/* Admin & Planner only routes */}
+                    <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'PLANNER']} />}>
+                      <Route path="/vendors" element={<VendorsPage />} />
+                      <Route path="/disruptions" element={<DisruptionsPage />} />
+                      <Route path="/reroutes" element={<ReroutesPage />} />
+                      <Route path="/analytics" element={<AnalyticsPage />} />
+                      <Route path="/agent-traces" element={<AgentTracesPage />} />
+                    </Route>
                   </Route>
                 </Route>
+
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </BrowserRouter>

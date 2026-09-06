@@ -106,17 +106,33 @@ export function OrdersPage() {
   const rangeStart = totalElements === 0 ? 0 : page * size + 1
   const rangeEnd = Math.min(totalElements, (page + 1) * size)
 
+  const { user } = useAuth()
+  const canCreate = user?.role === 'PLANNER' || user?.role === 'ADMIN'
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-text">Orders</h1>
-        <button
-          type="button"
-          onClick={() => setShowCreate(true)}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-fg shadow-sm shadow-accent/20 transition-all hover:opacity-90 active:scale-[0.98]"
-        >
-          New order
-        </button>
+        <div>
+          <h1 className="text-2xl font-semibold text-text">Orders</h1>
+          {user?.role === 'SUPPLIER' && (
+            <p className="mt-0.5 text-xs text-text-muted">
+              Logged in as Supplier representative. Showing assigned orders and fulfillment status.
+            </p>
+          )}
+        </div>
+        {canCreate ? (
+          <button
+            type="button"
+            onClick={() => setShowCreate(true)}
+            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-fg shadow-sm shadow-accent/20 transition-all hover:opacity-90 active:scale-[0.98]"
+          >
+            New order
+          </button>
+        ) : (
+          <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400">
+            Supplier View (Orders Read-Only)
+          </span>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -404,7 +420,7 @@ function CreateOrderModal({
   error: string | null
 }) {
   const { user } = useAuth()
-  const [region, setRegion] = useState('us-east')
+  const [region, setRegion] = useState('india-west')
   const [skuId, setSkuId] = useState('sku-1')
   const [quantity, setQuantity] = useState(1)
 

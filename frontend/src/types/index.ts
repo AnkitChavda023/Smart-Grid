@@ -32,6 +32,24 @@ export interface PageResponse<T> {
   totalElements: number
 }
 
+export interface VendorSkuItem {
+  id?: string
+  skuId: string
+  price: number
+  leadTimeDays: number
+}
+
+export interface VendorHealthReportItem {
+  id: string
+  vendorId: string
+  trendDirection: 'IMPROVING' | 'STABLE' | 'DEGRADING'
+  trendSlope: number
+  averageLeadTimeDays: number
+  breachCount: number
+  summary: string
+  createdAt: string
+}
+
 export interface VendorResponse {
   id: string
   name: string
@@ -39,8 +57,13 @@ export interface VendorResponse {
   latitude: number | null
   longitude: number | null
   capabilities: string
+  contact?: string
+  category?: string
+  certifications?: string
   suspended: boolean
   reliabilityScore: number
+  skus?: VendorSkuItem[]
+  scoreFormula?: string
 }
 
 export interface VendorDocument {
@@ -48,6 +71,9 @@ export interface VendorDocument {
   name: string
   region: string
   capabilities: string
+  contact?: string
+  category?: string
+  certifications?: string
 }
 
 export interface VendorRankingResult {
@@ -87,6 +113,52 @@ export interface RerouteSuccessRate {
   successRate: number
 }
 
+export interface OrderMetricsSummary {
+  today: number
+  thisWeek: number
+  thisMonth: number
+  total: number
+}
+
+export interface DisruptionWeeklyMetrics {
+  count: number
+  severityBreakdown: {
+    CRITICAL: number
+    HIGH: number
+    MEDIUM: number
+    LOW: number
+  }
+  confidences: number[]
+}
+
+export interface LeadTimeTrendPoint {
+  date: string
+  averageLeadTimeDays: number
+}
+
+export interface VendorSlaBreachRate {
+  vendorId: string
+  vendorName?: string
+  totalOrders: number
+  breachCount: number
+  breachRatePct: number
+  reliabilityScore?: number
+}
+
+export interface RerouteKpis {
+  successCount: number
+  escalationCount: number
+  successRate: number
+  confidences: number[]
+}
+
+export interface ConfidenceHistogramBucket {
+  bucket: string
+  range: string
+  count: number
+  percentage: number
+}
+
 export interface NotificationPushMessage {
   notificationId: string | null
   title: string
@@ -107,7 +179,7 @@ export interface Disruption {
   createdAt: string
 }
 
-export type RerouteStatus = 'PUBLISHED' | 'ESCALATED' | 'APPROVED'
+export type RerouteStatus = 'PUBLISHED' | 'ESCALATED' | 'APPROVED' | 'REJECTED' | 'MODIFIED'
 
 export interface Reroute {
   id: string
@@ -118,6 +190,16 @@ export interface Reroute {
   confidence: number
   agentTraceJson: string
   status: RerouteStatus
+  createdAt: string
+}
+
+export interface ContractDraft {
+  id: string
+  vendorId: string
+  existingContractId: string | null
+  proposedTerms: string
+  summary: string
+  status: 'DRAFT' | 'SUBMITTED' | 'REJECTED'
   createdAt: string
 }
 
@@ -139,6 +221,7 @@ export interface VendorEvaluation {
   breachCount: number
   confidence: number
   summary: string
+  draftId?: string
   status: 'PUBLISHED' | 'PENDING_REVIEW'
   createdAt: string
 }
@@ -177,3 +260,45 @@ export interface NegotiationRun {
   status: 'PUBLISHED' | 'PENDING_REVIEW'
   createdAt: string
 }
+
+export interface KafkaTriggerEvent {
+  topic: string
+  eventType: string
+  timestamp: string
+  payload: string
+}
+
+export interface RetrievedRagChunk {
+  source: string
+  sourceId: string
+  similarityScore: number
+  content: string
+}
+
+export interface McpToolCallTrace {
+  stepIndex: number
+  toolName: string
+  input: string
+  output: string
+  latencyMs: number
+  llmReasoning: string
+}
+
+export interface AgentFinalDecision {
+  confidenceScore: number
+  outcome: string
+  affectedEntities: Record<string, any>
+}
+
+export interface AgentDecisionTimelineData {
+  agentName: string
+  decisionId: string
+  status: string
+  confidence: number
+  kafkaTrigger: KafkaTriggerEvent
+  ragChunks: RetrievedRagChunk[]
+  toolCalls: McpToolCallTrace[]
+  llmReasoning: string
+  finalDecision: AgentFinalDecision
+}
+

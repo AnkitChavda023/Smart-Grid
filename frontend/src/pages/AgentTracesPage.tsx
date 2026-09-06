@@ -6,6 +6,7 @@ import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { InfoTooltip } from '../components/ui/InfoTooltip'
 import { LoadingState, ErrorState, EmptyState } from '../components/ui/StateViews'
+import { AgentDecisionTimeline } from '../components/ui/AgentDecisionTimeline'
 
 type Accent = 'accent' | 'success' | 'warning' | 'danger' | 'info'
 
@@ -140,58 +141,33 @@ function ConfidenceBadge({ confidence }: { confidence: number }) {
 
 function RerouteTraceTimeline({ rerouteId }: { rerouteId: string }) {
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['reroute-trace', rerouteId],
-    queryFn: () => agentsApi.rerouteTrace(rerouteId),
+    queryKey: ['reroute-timeline', rerouteId],
+    queryFn: () => agentsApi.rerouteTimeline(rerouteId),
   })
 
-  if (isLoading) return <LoadingState label="Loading tool call trace…" />
-  if (isError) return <ErrorState message="Couldn't load the trace for this reroute." onRetry={() => refetch()} />
-  if (!data?.length) return <EmptyState title="No trace recorded" description="This reroute has no stored tool call trace." />
+  if (isLoading) return <LoadingState label="Loading comprehensive agent execution timeline…" />
+  if (isError) return <ErrorState message="Couldn't load the trace timeline for this reroute." onRetry={() => refetch()} />
+  if (!data) return <EmptyState title="No trace recorded" description="This reroute has no stored trace." />
 
-  return (
-    <ol className="flex flex-col gap-4">
-      {data.map((step, idx) => (
-        <li key={step.stepIndex} className="relative flex gap-4">
-          <div className="flex flex-col items-center">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent ring-1 ring-accent/20">
-              {step.stepIndex + 1}
-            </span>
-            {idx < data.length - 1 && <span className="mt-1 w-px flex-1 bg-border" />}
-          </div>
-          <div className="min-w-0 flex-1 rounded-lg border border-border bg-bg/40 p-4 pb-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="text-sm font-semibold text-text">
-                <span className="font-mono text-accent">{step.toolName}</span>
-              </span>
-              <span className="rounded-full bg-border/50 px-2 py-0.5 text-xs text-text-muted tabular-nums">
-                {step.latencyMs}ms
-              </span>
-            </div>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">Input</p>
-                <pre className="mt-1 max-h-32 overflow-auto rounded-md bg-surface p-2 text-xs text-text">{step.input}</pre>
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">Output</p>
-                <pre className="mt-1 max-h-32 overflow-auto rounded-md bg-surface p-2 text-xs text-text">{step.output}</pre>
-              </div>
-            </div>
-            {step.llmReasoning && (
-              <div className="mt-3 border-t border-border pt-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">LLM reasoning</p>
-                <p className="mt-1 text-sm leading-relaxed text-text">{step.llmReasoning}</p>
-              </div>
-            )}
-          </div>
-        </li>
-      ))}
-    </ol>
-  )
+  return <AgentDecisionTimeline data={data} />
+}
+
+function DisruptionTraceTimeline({ disruptionId }: { disruptionId: string }) {
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ['disruption-timeline', disruptionId],
+    queryFn: () => agentsApi.disruptionTimeline(disruptionId),
+  })
+
+  if (isLoading) return <LoadingState label="Loading disruption detection timeline…" />
+  if (isError) return <ErrorState message="Couldn't load the trace timeline for this disruption." onRetry={() => refetch()} />
+  if (!data) return <EmptyState title="No trace recorded" description="This disruption has no stored trace." />
+
+  return <AgentDecisionTimeline data={data} />
 }
 
 function DisruptionTimelinePanel() {
   const [selectedDisruptionId, setSelectedDisruptionId] = useState<string | null>(null)
+  const [timelineTab, setTimelineTab] = useState<'disruption' | 'reroute'>('disruption')
 
   const disruptions = useQuery({
     queryKey: ['disruptions', 'active'],
@@ -256,32 +232,55 @@ function DisruptionTimelinePanel() {
 
       {selectedDisruption && (
         <div className="mt-5 animate-[fadeIn_150ms_ease-out] border-t border-border pt-5">
-          <div className="flex flex-wrap items-center gap-3">
-            <h3 className="text-sm font-semibold text-text">
-              Disruption: vendor {selectedDisruption.vendorId} in {selectedDisruption.region}
-            </h3>
-            <ConfidenceBadge confidence={selectedDisruption.confidence} />
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-text">
+                Disruption: vendor <span className="font-mono text-accent">{selectedDisruption.vendorId}</span> in {selectedDisruption.region}
+              </span>
+              <ConfidenceBadge confidence={selectedDisruption.confidence} />
+            </div>
+
+            <div className="flex items-center rounded-lg border border-border bg-surface p-0.5">
+              <button
+                type="button"
+                onClick={() => setTimelineTab('disruption')}
+                className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
+                  timelineTab === 'disruption'
+                    ? 'bg-accent text-accent-fg shadow-sm'
+                    : 'text-text-muted hover:text-text'
+                }`}
+              >
+                Disruption Detector Trace
+              </button>
+              <button
+                type="button"
+                onClick={() => setTimelineTab('reroute')}
+                className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
+                  timelineTab === 'reroute'
+                    ? 'bg-accent text-accent-fg shadow-sm'
+                    : 'text-text-muted hover:text-text'
+                }`}
+              >
+                Reroute Planner Trace
+              </button>
+            </div>
           </div>
-          <p className="mt-2 text-sm leading-relaxed text-text-muted">{selectedDisruption.reasoningTrace}</p>
 
           <div className="mt-4">
-            {reroutes.isLoading && <LoadingState label="Loading reroute decisions…" />}
-            {reroutes.isError && <ErrorState message="Couldn't load reroutes." onRetry={() => reroutes.refetch()} />}
-            {!reroutes.isLoading && !reroutes.isError && !reroutes.data?.length && (
-              <EmptyState title="No reroute decision yet" description="The reroute-planner agent has not acted on this disruption." />
-            )}
-            {latestReroute && (
+            {timelineTab === 'disruption' ? (
+              <DisruptionTraceTimeline disruptionId={selectedDisruption.id} />
+            ) : (
               <div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <h4 className="text-sm font-semibold text-text">
-                    Reroute decision for order {latestReroute.orderId}
-                  </h4>
-                  <Badge tone={latestReroute.status === 'ESCALATED' ? 'warning' : 'success'}>{latestReroute.status}</Badge>
-                  <ConfidenceBadge confidence={latestReroute.confidence} />
-                </div>
-                <div className="mt-4">
-                  <RerouteTraceTimeline rerouteId={latestReroute.id} />
-                </div>
+                {reroutes.isLoading && <LoadingState label="Loading reroute decisions…" />}
+                {reroutes.isError && <ErrorState message="Couldn't load reroutes." onRetry={() => reroutes.refetch()} />}
+                {!reroutes.isLoading && !reroutes.isError && !reroutes.data?.length && (
+                  <EmptyState title="No reroute decision yet" description="The reroute-planner agent has not acted on this disruption." />
+                )}
+                {latestReroute && (
+                  <div className="space-y-4">
+                    <RerouteTraceTimeline rerouteId={latestReroute.id} />
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -404,6 +403,17 @@ function VendorEvaluatorPanel() {
             <ConfidenceBadge confidence={latest.confidence} />
           </div>
           <p className="text-text-muted">{latest.summary}</p>
+          {latest.draftId && (
+            <div className="mt-2 flex items-center justify-between border-t border-border pt-2 text-xs">
+              <span className="text-text-muted">Draft ready for human approval</span>
+              <a
+                href="/sla"
+                className="font-medium text-accent hover:underline flex items-center gap-1"
+              >
+                Open Review Queue →
+              </a>
+            </div>
+          )}
         </div>
       )}
     </Card>

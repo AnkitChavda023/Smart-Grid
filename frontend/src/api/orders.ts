@@ -24,3 +24,8 @@ export function createOrder(request: CreateOrderRequest) {
 export function cancelOrder(id: string, reason?: string) {
   return apiClient.patch<void>(`/orders/${id}/cancel`, reason ? { reason } : undefined)
 }
+
+export function updateOrderStatus(id: string, status: string) {
+  return apiClient.patch<OrderResponse>(`/orders/${id}/status`, { status }).then((r) => r.data)
+}
+
