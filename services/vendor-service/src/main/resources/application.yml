@@ -1,0 +1,29 @@
+server:
+  port: 8182
+
+spring:
+  application:
+    name: vendor-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/vendor_db
+    username: smartgrid
+    password: smartgrid_dev_pw
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  data:
+    redis:
+      host: localhost
+      port: 6379
+    elasticsearch:
+      client:
+        base-url: localhost:9200
+
+smartgrid:
+  kafka:
+    bootstrap-servers: localhost:9092
+    schema-registry-url: http://localhost:18081
+    group-id: vendor-service
+  tracing:
+    service-name: vendor-service
