@@ -1,0 +1,22 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: shipment-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/shipment_db
+    username: smartgrid
+    password: smartgrid_dev_pw
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+smartgrid:
+  kafka:
+    bootstrap-servers: localhost:9092
+    schema-registry-url: http://localhost:18081
+    group-id: shipment-service
+  tracing:
+    service-name: shipment-service
