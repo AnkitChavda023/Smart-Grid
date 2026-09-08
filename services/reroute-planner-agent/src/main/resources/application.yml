@@ -1,0 +1,46 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: reroute-planner-agent
+  datasource:
+    url: jdbc:postgresql://localhost:5432/reroute_planner_db
+    username: smartgrid
+    password: smartgrid_dev_pw
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  kafka:
+    bootstrap-servers: localhost:9092
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+
+smartgrid:
+  kafka:
+    bootstrap-servers: localhost:9092
+    schema-registry-url: http://localhost:18081
+    group-id: reroute-planner-agent
+  tracing:
+    service-name: reroute-planner-agent
+  reroute:
+    max-tool-calls: 6
+    confidence-threshold: 0.70
+    order-service:
+      base-url: http://localhost:8181
+    mcp-server:
+      base-url: http://localhost:8095
+      internal-token: local-dev-internal-token
+    openai:
+      # Defaults to a local Ollama instance (OpenAI-compatible API) so this agent works with
+      # zero cloud dependency out of the box. To use real OpenAI instead, set all three env
+      # vars below - nothing here needs to change, this is a pure config swap:
+      #   OPENAI_API_KEY=sk-...  LLM_BASE_URL=https://api.openai.com/v1  LLM_MODEL=gpt-4o-mini
+      api-key: ${OPENAI_API_KEY:ollama}
+      base-url: ${LLM_BASE_URL:http://localhost:11434/v1}
+      chat-model: ${LLM_MODEL:llama3.1:8b}
