@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "PreemptiveRestockTriggered",
+  "namespace": "com.smartgrid.commons.avro.inventory",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "skuId", "type": "string" },
+    { "name": "warehouseId", "type": "string" },
+    { "name": "quantity", "type": "long" },
+    { "name": "reason", "type": "string" }
+  ]
+}

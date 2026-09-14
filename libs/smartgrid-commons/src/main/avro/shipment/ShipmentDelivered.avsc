@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "name": "ShipmentDelivered",
+  "namespace": "com.smartgrid.commons.avro.shipment",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "shipmentId", "type": "string" },
+    { "name": "orderId", "type": "string" },
+    { "name": "confirmedBy", "type": ["null", "string"], "default": null }
+  ]
+}

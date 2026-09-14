@@ -1,0 +1,5 @@
+com.smartgrid.commons.web.WebAutoConfiguration
+com.smartgrid.commons.kafka.KafkaAutoConfiguration
+com.smartgrid.commons.tracing.TracingAutoConfiguration
+com.smartgrid.commons.security.SecurityAutoConfiguration
+com.smartgrid.commons.metrics.MetricsAutoConfiguration

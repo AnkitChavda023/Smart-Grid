@@ -1,0 +1,15 @@
+[
+  { "name": "order-events",         "partitions": 12, "partitionKey": "order_id",       "retentionDays": 7  },
+  { "name": "vendor-events",        "partitions": 6,  "partitionKey": "vendor_id",      "retentionDays": 7  },
+  { "name": "disruption-signals",   "partitions": 3,  "partitionKey": "region",         "retentionDays": 3  },
+  { "name": "disruption-detected",  "partitions": 3,  "partitionKey": "disruption_id",  "retentionDays": 7  },
+  { "name": "reroute-decisions",    "partitions": 3,  "partitionKey": "order_id",       "retentionDays": 30 },
+  { "name": "notifications",        "partitions": 6,  "partitionKey": "user_id",        "retentionDays": 1  },
+  { "name": "inventory-events",     "partitions": 6,  "partitionKey": "sku_id",         "retentionDays": 7  },
+  { "name": "shipment-events",      "partitions": 6,  "partitionKey": "shipment_id",    "retentionDays": 14 },
+  { "name": "quote-events",         "partitions": 3,  "partitionKey": "order_id",       "retentionDays": 3  },
+  { "name": "sla-events",           "partitions": 3,  "partitionKey": "vendor_id",      "retentionDays": 30 },
+  { "name": "analytics-aggregates", "partitions": 3,  "partitionKey": "metric_type",    "retentionDays": 7  },
+  { "name": "dlq-all",              "partitions": 3,  "partitionKey": "original_topic", "retentionDays": 14 },
+  { "name": "contract-sync-events", "partitions": 3,  "partitionKey": "contract_id",    "retentionDays": 7  }
+]

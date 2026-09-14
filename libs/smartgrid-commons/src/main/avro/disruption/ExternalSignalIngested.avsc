@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "ExternalSignalIngested",
+  "namespace": "com.smartgrid.commons.avro.disruption",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "signalId", "type": "string" },
+    { "name": "region", "type": "string" },
+    { "name": "signalType", "type": "string" },
+    { "name": "severity", "type": "double" },
+    { "name": "sourceDescription", "type": "string" }
+  ]
+}

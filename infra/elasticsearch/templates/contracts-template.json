@@ -1,0 +1,10 @@
+{
+  "index_patterns": ["contracts_index*"],
+  "composed_of": ["smartgrid-defaults"],
+  "priority": 100,
+  "template": {
+    "mappings": {
+      "dynamic": "true"
+    }
+  }
+}

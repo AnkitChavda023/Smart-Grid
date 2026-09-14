@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "name": "ContractDraftGenerated",
+  "namespace": "com.smartgrid.commons.avro.contract",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "draftId", "type": "string" },
+    { "name": "vendorId", "type": "string" },
+    { "name": "summary", "type": "string" }
+  ]
+}

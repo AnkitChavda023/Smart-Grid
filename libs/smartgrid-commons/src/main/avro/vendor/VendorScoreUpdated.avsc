@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "VendorScoreUpdated",
+  "namespace": "com.smartgrid.commons.avro.vendor",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "vendorId", "type": "string" },
+    { "name": "skuId", "type": ["null", "string"], "default": null },
+    { "name": "previousScore", "type": "double" },
+    { "name": "newScore", "type": "double" },
+    { "name": "reason", "type": "string" }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "DeadLetterEnvelope",
+  "namespace": "com.smartgrid.commons.avro.dlq",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "originalTopic", "type": "string" },
+    { "name": "originalKey", "type": ["null", "string"], "default": null },
+    { "name": "originalPayload", "type": "bytes" },
+    { "name": "errorReason", "type": "string" },
+    { "name": "retryCount", "type": "int" }
+  ]
+}

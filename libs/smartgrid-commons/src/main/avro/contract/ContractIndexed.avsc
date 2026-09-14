@@ -1,0 +1,16 @@
+{
+  "type": "record",
+  "name": "ContractIndexed",
+  "namespace": "com.smartgrid.commons.avro.contract",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "contractId", "type": "string" },
+    { "name": "vendorId", "type": "string" },
+    { "name": "terms", "type": "string" },
+    { "name": "startDate", "type": "string" },
+    { "name": "endDate", "type": "string" },
+    { "name": "active", "type": "boolean" }
+  ]
+}

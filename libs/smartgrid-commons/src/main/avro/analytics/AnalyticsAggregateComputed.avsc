@@ -1,0 +1,16 @@
+{
+  "type": "record",
+  "name": "AnalyticsAggregateComputed",
+  "namespace": "com.smartgrid.commons.avro.analytics",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "metricType", "type": "string" },
+    { "name": "windowType", "type": "string" },
+    { "name": "windowStart", "type": "long" },
+    { "name": "windowEnd", "type": "long" },
+    { "name": "value", "type": "double" },
+    { "name": "dimensions", "type": { "type": "map", "values": "string" }, "default": {} }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "VendorConfirmed",
+  "namespace": "com.smartgrid.commons.avro.vendor",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "orderId", "type": "string" },
+    { "name": "vendorId", "type": "string" },
+    { "name": "skuId", "type": "string" },
+    { "name": "quantity", "type": "int" }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "name": "ContractExpiring",
+  "namespace": "com.smartgrid.commons.avro.sla",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "contractId", "type": "string" },
+    { "name": "vendorId", "type": "string" },
+    { "name": "daysRemaining", "type": "int" }
+  ]
+}

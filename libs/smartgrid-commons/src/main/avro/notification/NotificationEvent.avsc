@@ -1,0 +1,16 @@
+{
+  "type": "record",
+  "name": "NotificationEvent",
+  "namespace": "com.smartgrid.commons.avro.notification",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "notificationId", "type": "string" },
+    { "name": "userId", "type": "string" },
+    { "name": "channel", "type": "string" },
+    { "name": "title", "type": "string" },
+    { "name": "body", "type": "string" },
+    { "name": "relatedEntityId", "type": ["null", "string"], "default": null }
+  ]
+}

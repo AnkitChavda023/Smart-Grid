@@ -1,0 +1,27 @@
+{
+  "type": "record",
+  "name": "OrderCreated",
+  "namespace": "com.smartgrid.commons.avro.order",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "orderId", "type": "string" },
+    { "name": "requestedBy", "type": "string" },
+    { "name": "destinationRegion", "type": "string" },
+    {
+      "name": "items",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "OrderLineItem",
+          "fields": [
+            { "name": "skuId", "type": "string" },
+            { "name": "quantity", "type": "int" }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "SLARiskReportGenerated",
+  "namespace": "com.smartgrid.commons.avro.sla",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "vendorId", "type": "string" },
+    { "name": "breachProbability", "type": "double" },
+    { "name": "confidence", "type": "double" },
+    { "name": "summary", "type": "string" }
+  ]
+}

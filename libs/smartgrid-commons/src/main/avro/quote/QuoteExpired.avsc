@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "QuoteExpired",
+  "namespace": "com.smartgrid.commons.avro.quote",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "quoteId", "type": "string" }
+  ]
+}

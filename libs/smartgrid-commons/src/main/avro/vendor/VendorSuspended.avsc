@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "name": "VendorSuspended",
+  "namespace": "com.smartgrid.commons.avro.vendor",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "vendorId", "type": "string" },
+    { "name": "reason", "type": "string" }
+  ]
+}

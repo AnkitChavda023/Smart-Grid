@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "SLABreached",
+  "namespace": "com.smartgrid.commons.avro.sla",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "breachId", "type": "string" },
+    { "name": "vendorId", "type": "string" },
+    { "name": "contractId", "type": "string" },
+    { "name": "severity", "type": "string" },
+    { "name": "penaltyAmount", "type": "double" }
+  ]
+}

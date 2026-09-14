@@ -1,0 +1,23 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # All 6 agents run on the host (mvn spring-boot:run), not inside docker-compose — Docker Desktop
+  # resolves host.docker.internal to the host automatically on Windows, no extra_hosts needed.
+  - job_name: smartgrid-agents
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - "host.docker.internal:8085"
+          - "host.docker.internal:8086"
+          - "host.docker.internal:8091"
+          - "host.docker.internal:8092"
+          - "host.docker.internal:8093"
+          - "host.docker.internal:8094"
+        labels:
+          group: agents

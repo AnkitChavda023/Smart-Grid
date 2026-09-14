@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "DisruptionDetected",
+  "namespace": "com.smartgrid.commons.avro.disruption",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "disruptionId", "type": "string" },
+    { "name": "affectedSkus", "type": { "type": "array", "items": "string" } },
+    { "name": "region", "type": "string" },
+    { "name": "confidence", "type": "double" },
+    { "name": "reasoningTrace", "type": "string" }
+  ]
+}

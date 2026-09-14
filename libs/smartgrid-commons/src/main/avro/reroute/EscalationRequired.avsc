@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "EscalationRequired",
+  "namespace": "com.smartgrid.commons.avro.reroute",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "orderId", "type": "string" },
+    { "name": "disruptionId", "type": ["null", "string"], "default": null },
+    { "name": "reason", "type": "string" },
+    { "name": "confidence", "type": "double" }
+  ]
+}

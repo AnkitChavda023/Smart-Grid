@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "SafetyStockUpdateRecommended",
+  "namespace": "com.smartgrid.commons.avro.demand",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "skuId", "type": "string" },
+    { "name": "warehouseId", "type": "string" },
+    { "name": "recommendedSafetyStockLevel", "type": "long" },
+    { "name": "reason", "type": "string" }
+  ]
+}

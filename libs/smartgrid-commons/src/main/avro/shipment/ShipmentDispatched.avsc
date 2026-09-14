@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "ShipmentDispatched",
+  "namespace": "com.smartgrid.commons.avro.shipment",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "shipmentId", "type": "string" },
+    { "name": "orderId", "type": "string" },
+    { "name": "originWarehouseId", "type": "string" },
+    { "name": "destination", "type": "string" }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "VendorHealthReportGenerated",
+  "namespace": "com.smartgrid.commons.avro.vendor",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "vendorId", "type": "string" },
+    { "name": "trendDirection", "type": "string" },
+    { "name": "confidence", "type": "double" },
+    { "name": "summary", "type": "string" }
+  ]
+}

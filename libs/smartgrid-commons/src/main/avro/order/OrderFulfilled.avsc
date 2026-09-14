@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "OrderFulfilled",
+  "namespace": "com.smartgrid.commons.avro.order",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "orderId", "type": "string" },
+    { "name": "vendorId", "type": "string" },
+    { "name": "quoteId", "type": "string" },
+    { "name": "destinationRegion", "type": ["null", "string"], "default": null }
+  ]
+}

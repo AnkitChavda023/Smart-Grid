@@ -1,0 +1,10 @@
+{
+  "index_patterns": ["vendor-catalog*"],
+  "composed_of": ["smartgrid-defaults"],
+  "priority": 100,
+  "template": {
+    "mappings": {
+      "dynamic": "true"
+    }
+  }
+}

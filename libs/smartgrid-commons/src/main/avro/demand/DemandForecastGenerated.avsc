@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "DemandForecastGenerated",
+  "namespace": "com.smartgrid.commons.avro.demand",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "occurredAt", "type": "long" },
+    { "name": "correlationId", "type": "string" },
+    { "name": "skuId", "type": "string" },
+    { "name": "horizonDays", "type": "int" },
+    { "name": "p10", "type": "double" },
+    { "name": "p50", "type": "double" },
+    { "name": "p90", "type": "double" }
+  ]
+}

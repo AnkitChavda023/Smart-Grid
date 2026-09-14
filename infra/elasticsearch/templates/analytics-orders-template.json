@@ -1,0 +1,21 @@
+{
+  "index_patterns": ["analytics_orders-*"],
+  "composed_of": ["smartgrid-defaults"],
+  "priority": 100,
+  "template": {
+    "settings": {
+      "index.lifecycle.name": "analytics-ilm-policy",
+      "index.lifecycle.rollover_alias": "analytics_orders"
+    },
+    "mappings": {
+      "properties": {
+        "metricType": { "type": "keyword" },
+        "windowType": { "type": "keyword" },
+        "windowStart": { "type": "long" },
+        "windowEnd": { "type": "long" },
+        "value": { "type": "double" },
+        "dimensions": { "type": "object", "dynamic": "true" }
+      }
+    }
+  }
+}
