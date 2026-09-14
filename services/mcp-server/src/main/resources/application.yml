@@ -1,0 +1,24 @@
+server:
+  port: 8095
+
+spring:
+  application:
+    name: mcp-server
+
+smartgrid:
+  tracing:
+    service-name: mcp-server
+  mcp:
+    internal-token: ${MCP_INTERNAL_TOKEN:local-dev-internal-token}
+    vendor-service:
+      base-url: http://localhost:8182
+    inventory-service:
+      base-url: http://localhost:8183
+    pricing-service:
+      base-url: http://localhost:8089
+    analytics-service:
+      base-url: http://localhost:8090
+    contract-service:
+      base-url: http://localhost:8088
+    notification-service:
+      base-url: http://localhost:8084

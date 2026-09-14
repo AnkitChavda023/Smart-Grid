@@ -1,0 +1,56 @@
+server:
+  port: 8096
+
+spring:
+  application:
+    name: rag-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/rag_db
+    username: smartgrid
+    password: smartgrid_dev_pw
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+  sql:
+    init:
+      mode: always
+  data:
+    elasticsearch:
+      client:
+        base-url: localhost:9200
+  kafka:
+    bootstrap-servers: localhost:9092
+
+smartgrid:
+  kafka:
+    bootstrap-servers: localhost:9092
+    schema-registry-url: http://localhost:18081
+    group-id: rag-service
+  tracing:
+    service-name: rag-service
+  rag:
+    openai:
+      # Defaults to a local Ollama instance (OpenAI-compatible /v1/embeddings API) so this
+      # service works with zero cloud dependency out of the box. To use real OpenAI instead,
+      # set all four env vars below - nothing here needs to change, this is a pure config swap:
+      #   OPENAI_API_KEY=sk-...  LLM_BASE_URL=https://api.openai.com/v1
+      #   EMBEDDING_MODEL=text-embedding-3-small  EMBEDDING_DIMENSIONS=1536
+      # Note: switching embedding models means re-running POST /rag/ingest - the two models'
+      # vectors aren't compatible with each other, and schema.sql's column width must match
+      # embedding-dimensions (see the migration note there).
+      api-key: ${OPENAI_API_KEY:ollama}
+      base-url: ${LLM_BASE_URL:http://localhost:11434/v1}
+      embedding-model: ${EMBEDDING_MODEL:nomic-embed-text}
+      embedding-dimensions: ${EMBEDDING_DIMENSIONS:768}
+    chunk:
+      max-chars: 500
+      overlap-chars: 50
+    retrieval:
+      vector-candidates: 20
+      keyword-candidates: 20
+      rrf-k: 60
+    vendor-service:
+      base-url: http://localhost:8182
+    contract-service:
+      base-url: http://localhost:8088

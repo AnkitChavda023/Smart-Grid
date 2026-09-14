@@ -1,0 +1,39 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: analytics-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/analytics_db
+    username: smartgrid
+    password: smartgrid_dev_pw
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  data:
+    elasticsearch:
+      client:
+        base-url: localhost:9200
+  kafka:
+    bootstrap-servers: localhost:9092
+    streams:
+      application-id: analytics-service-streams
+      properties:
+        schema.registry.url: http://localhost:18081
+        default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        cache.max.bytes.buffering: 0
+        commit.interval.ms: 1000
+
+smartgrid:
+  kafka:
+    bootstrap-servers: localhost:9092
+    schema-registry-url: http://localhost:18081
+    group-id: analytics-service
+  tracing:
+    service-name: analytics-service
+  analytics:
+    tumbling-window-ms: 3600000
+    hopping-window-ms: 604800000
+    hopping-advance-ms: 3600000
